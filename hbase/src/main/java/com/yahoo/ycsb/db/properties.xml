@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>This is a property and workload file for phoenix in YCSB </comment>
+<entry key="create">CREATE TABLE IF NOT EXISTS usertable (ID VARCHAR PRIMARY KEY, FIELD1 VARCHAR, FIELD2 VARCHAR, FIELD3 VARCHAR, FIELD4 VARCHAR, FIELD5 VARCHAR)</entry>
+<entry key="read">SELECT * FROM usertable WHERE ID = ?</entry>
+<entry key="insert">UPSERT INTO usertable VALUES (?,?,?,?,?,?)</entry>
+<entry key="update">UPSERT INTO usertable VALUES (?,?,?,?,?,?)</entry>
+<entry key="delete">DELETE FROM usertable WHERE ID =?</entry>
+<entry key="scan">SELECT * FROM usertable WHERE ID > ? LIMIT ?</entry>
+<entry key="fieldcount">5</entry>
+<entry key="recordcount">100</entry>
+<entry key="operationcount">100</entry>
+<entry key="readallfields">true</entry>
+<entry key="workload">com.yahoo.ycsb.workloads.CoreWorkload</entry>
+<entry key="columnfamily">family</entry>
+<entry key="readproportion">0.5</entry>
+<entry key="updateproportion">0.5</entry>
+<entry key="scanproportion">0</entry>
+<entry key="insertproportion">0</entry>
+<entry key="deleteproportion">0</entry>
+<entry key="requestdistribution">zipfian</entry>
+</properties>
