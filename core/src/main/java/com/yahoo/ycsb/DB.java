@@ -18,6 +18,7 @@
 package com.yahoo.ycsb;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -114,7 +115,7 @@ public abstract class DB
 	 * @return Zero on success, a non-zero error code on error.  See this class's description for a discussion of error codes.
 	 */
 	public abstract int update(String table, String key, HashMap<String,ByteIterator> values);
-
+	//public abstract int update(String table, String key, Hashtable<String,Integer> values);
 	/**
 	 * Insert a record in the database. Any field/value pairs in the specified values HashMap will be written into the record with the specified
 	 * record key.

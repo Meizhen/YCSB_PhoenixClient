@@ -524,9 +524,15 @@ public class Client
 				argindex++;
 
 				Properties myfileprops=new Properties();
+				// read properties from an external property file, by Meizhen
 				try
-				{
-					myfileprops.load(new FileInputStream(propfile));
+				{   //change to myfileprops.loadFromXML(new FileInputStream(propfile));
+					//FileInputStream fis = new FileInputStream("/home/meizhen/workspace/phoenixTest/src/properties.xml");
+					//fileprops.loadFromXML(fis);
+					fileprops.loadFromXML(new FileInputStream(propfile));
+					//fileprops.list(System.out);
+				    //System.out.println("The foo property: " + fileprops.getProperty("workload"));
+					
 				}
 				catch (IOException e)
 				{
@@ -535,12 +541,13 @@ public class Client
 				}
 
 				//Issue #5 - remove call to stringPropertyNames to make compilable under Java 1.5
-				for (Enumeration e=myfileprops.propertyNames(); e.hasMoreElements(); )
+				//comment here...
+				/*for (Enumeration e=myfileprops.propertyNames(); e.hasMoreElements(); )
 				{
 				   String prop=(String)e.nextElement();
 				   
 				   fileprops.setProperty(prop,myfileprops.getProperty(prop));
-				}
+				}*/
 
 			}
 			else if (args[argindex].compareTo("-p")==0)

@@ -1,0 +1,12 @@
+
+  <?xml version="1.0"?>
+  <workload name="sample workload">
+  <query name="q1">
+   <statement><![ CDATA [SELECT * FROM usertable WHERE user_id=? and user_location=?]]></query>
+   <binds>
+     <binding pos="1">zipfian</binding>
+     <binding pos="2">uniform</binding>
+   </binds>
+   <proportion>0.8</queryproportion>
+  </query>
+  </workload>

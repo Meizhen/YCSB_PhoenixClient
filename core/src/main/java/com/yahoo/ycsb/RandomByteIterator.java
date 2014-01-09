@@ -16,6 +16,9 @@
  */
 package com.yahoo.ycsb;
 
+import com.yahoo.ycsb.generator.IntegerGenerator;
+import com.yahoo.ycsb.generator.UniformIntegerGenerator;
+
 /**
  *  A ByteIterator that generates a random sequence of bytes.
  */
@@ -24,6 +27,7 @@ public class RandomByteIterator extends ByteIterator {
   private long off;
   private int bufOff;
   private byte[] buf;
+  private IntegerGenerator generator;
 
   @Override
   public boolean hasNext() {
@@ -32,6 +36,7 @@ public class RandomByteIterator extends ByteIterator {
 
   private void fillBytesImpl(byte[] buffer, int base) {
     int bytes = Utils.random().nextInt();
+	  //int bytes=generator.nextInt();
     try {
       buffer[base+0] = (byte)(((bytes) & 31) + ' ');
       buffer[base+1] = (byte)(((bytes >> 5) & 31) + ' ');
@@ -52,10 +57,12 @@ public class RandomByteIterator extends ByteIterator {
 
   public RandomByteIterator(long len) {
     this.len = len;
+    //this.buf = new byte[6];
     this.buf = new byte[6];
     this.bufOff = buf.length;
     fillBytes();
     this.off = 0;
+    generator=new UniformIntegerGenerator(1,200);
   }
 
   public byte nextByte() {

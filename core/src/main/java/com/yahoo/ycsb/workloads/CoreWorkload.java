@@ -18,6 +18,7 @@
 package com.yahoo.ycsb.workloads;
 
 import java.util.Properties;
+
 import com.yahoo.ycsb.*;
 import com.yahoo.ycsb.generator.CounterGenerator;
 import com.yahoo.ycsb.generator.DiscreteGenerator;
@@ -36,7 +37,25 @@ import com.yahoo.ycsb.measurements.Measurements;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Vector;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Properties;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * The core benchmark scenario. Represents a set of clients doing simple CRUD operations. The relative 
@@ -274,6 +293,40 @@ public class CoreWorkload extends Workload
 
 	int recordcount;
 	
+	/**
+	 * use different generator to generate different distributions for different transactions
+	 * @author meizhen
+	 * */
+	IntegerGenerator selectKey;
+	IntegerGenerator updateKey;
+	IntegerGenerator insertKey;
+	IntegerGenerator scanKey;
+	
+	IntegerGenerator uniformGenerator;
+	IntegerGenerator zipfianGenerator;
+	IntegerGenerator exponentialGenerator;
+	
+	/**
+	 * proportion of each transaction
+	 * @author meizhen
+	 * */
+	double readproportion;
+	double scanproportion;
+	double updateproportion;
+	double insertproportion;
+	double deleteproportion;	
+	
+	/**
+	 * bindings of each transaction
+	 * @author meizhen
+	 * */
+	Hashtable<Integer, String> readbinds=new Hashtable<Integer, String>();
+	Hashtable<Integer, String> scanbinds=new Hashtable<Integer, String>();
+	Hashtable<Integer, String> updatebinds=new Hashtable<Integer, String>();
+	Hashtable<Integer, String> insertbinds=new Hashtable<Integer, String>();
+	Hashtable<Integer, String> deletebinds=new Hashtable<Integer, String>();
+
+	
 	protected static IntegerGenerator getFieldLengthGenerator(Properties p) throws WorkloadException{
 		IntegerGenerator fieldlengthgenerator;
 		String fieldlengthdistribution = p.getProperty(FIELD_LENGTH_DISTRIBUTION_PROPERTY, FIELD_LENGTH_DISTRIBUTION_PROPERTY_DEFAULT);
@@ -303,15 +356,116 @@ public class CoreWorkload extends Workload
 	 */
 	public void init(Properties p) throws WorkloadException
 	{
-		table = p.getProperty(TABLENAME_PROPERTY,TABLENAME_PROPERTY_DEFAULT);
+
+		//insert
+		//PreparedStatement selectSt;
+		String select;
+		//Properties prop = new Properties();
+		Hashtable<Integer, String> binds=new Hashtable<Integer, String>();
+
+		try{
+			//Class.forName("com.salesforce.phoenix.jdbc.PhoenixDriver");
+			//Connection conn = DriverManager.getConnection("jdbc:phoenix:yahoo029.nicl.cs.duke.edu,yahoo030.nicl.cs.duke.edu,yahoo031.nicl.cs.duke.edu:2181",prop);
+			/**
+			 * use WorkloadParse in Phoenix Test to read in the workload information from workload.xml
+			 * */
+			File fXmlFile = new File("/home/meizhen/workspace/phoenixTest/src/workload.xml");
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(fXmlFile);
+			NodeList nList = doc.getElementsByTagName("query");
+			System.out.println(nList.getLength());
+
+	 
+			for (int temp = 0; temp < nList.getLength(); temp++) {
+	 
+				Node nNode = nList.item(temp);
+	 
+				System.out.println("\nCurrent Element :" + ((Element)nNode).getAttribute("name"));
+	 
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+	 
+					Element eElement = (Element) nNode;
+					
+	 
+					System.out.println("Staff id : " + eElement.getAttribute("name"));
+					String name=eElement.getAttribute("name");
+					select= eElement.getElementsByTagName("statement").item(0).getTextContent();
+					//selectSt=conn.prepareStatement(select);
+					//read and record proportions for each transaction
+					System.out.println("proportion : " + eElement.getElementsByTagName("proportion").item(0).getTextContent());
+					String proportion=eElement.getElementsByTagName("proportion").item(0).getTextContent();
+					if (name.equals("read")) {
+						readproportion=Double.parseDouble(proportion);
+						binds=readbinds;
+					}
+					if (name.equals("scan")) {
+						scanproportion=Double.parseDouble(proportion);
+						binds=scanbinds;
+					}
+					if (name.equals("update")) {
+						updateproportion=Double.parseDouble(proportion);
+						binds=updatebinds;
+					}
+					if (name.equals("insert")) {
+						insertproportion=Double.parseDouble(proportion);
+						binds=insertbinds;
+					}
+					if (name.equals("delete")) {
+						deleteproportion=Double.parseDouble(proportion);
+						binds=deletebinds;
+					}
+					NodeList binding=eElement.getElementsByTagName("binding");
+					if (binding!=null){
+					//NodeList children=binding.getChildNodes();
+					int len= binding.getLength();
+					System.out.println(len);
+					String[] bindings=new String[len];
+					for (int i = 0; i < len; i++) {
+						Node textChild = binding.item(i);
+						Element e=(Element)textChild;
+						//String type=e.getAttribute("type");						
+						bindings[i]=textChild.getTextContent();	
+						binds.put(i,bindings[i]);
+						System.out.println(bindings[i]);
+					}
+					
+				//System.out.println(bind.getTextContent());										
+				//System.out.println("bindiHashtable<Integer, String> binds;ng : " + eElement.getElementsByTagName("binds").item(1).getTextContent());
+				/*for (String s:bindings){
+					System.out.println(s);
+					String keyDistri=binds.get(0);
+    	IntegerGenerator keyGenerator;
+    	int keynum;
+    	if (keyDistri.equals("uniform"))keyGenerator=uniformKey;
+    	if (keyDistri.equals("zipfian"))keyGenerator=zipfianKey;
+    	if (keyDistri.equals("latest"))keyGenerator=latestKey;
+				}*/
+					}
+			//createSt.executeUpdate();
+			}
+		}
+		}
 		
+		catch (ParserConfigurationException e){
+			  System.err.println("Error in Parser: " + e);
+		 }
+		catch (SAXException e){
+			  System.err.println("Error in SAX: " + e);
+		 }
+		catch (IOException e){
+			  System.err.println("Error in IO: " + e);
+		 }	
+	
+		//
+		table = p.getProperty(TABLENAME_PROPERTY,TABLENAME_PROPERTY_DEFAULT);
+	
 		fieldcount=Integer.parseInt(p.getProperty(FIELD_COUNT_PROPERTY,FIELD_COUNT_PROPERTY_DEFAULT));
 		fieldlengthgenerator = CoreWorkload.getFieldLengthGenerator(p);
-		
-		double readproportion=Double.parseDouble(p.getProperty(READ_PROPORTION_PROPERTY,READ_PROPORTION_PROPERTY_DEFAULT));
-		double updateproportion=Double.parseDouble(p.getProperty(UPDATE_PROPORTION_PROPERTY,UPDATE_PROPORTION_PROPERTY_DEFAULT));
-		double insertproportion=Double.parseDouble(p.getProperty(INSERT_PROPORTION_PROPERTY,INSERT_PROPORTION_PROPERTY_DEFAULT));
-		double scanproportion=Double.parseDouble(p.getProperty(SCAN_PROPORTION_PROPERTY,SCAN_PROPORTION_PROPERTY_DEFAULT));
+		//double readproportion=Double.parseDouble(p.getProperty(READ_PROPORTION_PROPERTY,READ_PROPORTION_PROPERTY_DEFAULT));
+		//double updateproportion=Double.parseDouble(p.getProperty(UPDATE_PROPORTION_PROPERTY,UPDATE_PROPORTION_PROPERTY_DEFAULT));
+		//double insertproportion=Double.parseDouble(p.getProperty(INSERT_PROPORTION_PROPERTY,INSERT_PROPORTION_PROPERTY_DEFAULT));
+		//double scanproportion=Double.parseDouble(p.getProperty(SCAN_PROPORTION_PROPERTY,SCAN_PROPORTION_PROPERTY_DEFAULT));
 		double readmodifywriteproportion=Double.parseDouble(p.getProperty(READMODIFYWRITE_PROPORTION_PROPERTY,READMODIFYWRITE_PROPORTION_PROPERTY_DEFAULT));
 		recordcount=Integer.parseInt(p.getProperty(Client.RECORD_COUNT_PROPERTY));
 		String requestdistrib=p.getProperty(REQUEST_DISTRIBUTION_PROPERTY,REQUEST_DISTRIBUTION_PROPERTY_DEFAULT);
@@ -322,6 +476,7 @@ public class CoreWorkload extends Workload
 		
 		readallfields=Boolean.parseBoolean(p.getProperty(READ_ALL_FIELDS_PROPERTY,READ_ALL_FIELDS_PROPERTY_DEFAULT));
 		writeallfields=Boolean.parseBoolean(p.getProperty(WRITE_ALL_FIELDS_PROPERTY,WRITE_ALL_FIELDS_PROPERTY_DEFAULT));
+		
 		
 		if (p.getProperty(INSERT_ORDER_PROPERTY,INSERT_ORDER_PROPERTY_DEFAULT).compareTo("hashed")==0)
 		{
@@ -417,7 +572,52 @@ public class CoreWorkload extends Workload
 		else
 		{
 			throw new WorkloadException("Distribution \""+scanlengthdistrib+"\" not allowed for scan length");
+		}	
+		//initialize keychooser for differenct trasactions
+		if (readbinds.get(0)!=null){
+			String readDis=readbinds.get(0);
+	    	if (readDis.equals("uniform"))selectKey=new UniformIntegerGenerator(0,recordcount-1);
+	    	if (readDis.equals("zipfian")){
+	    		int opcount=Integer.parseInt(p.getProperty(Client.OPERATION_COUNT_PROPERTY));
+				int expectednewkeys=(int)(((double)opcount)*insertproportion*2.0); //2 is fudge factor				
+				selectKey=new ScrambledZipfianGenerator(recordcount+expectednewkeys);	    		
+	    	}
+	    	if (readDis.equals("latest"))selectKey=new SkewedLatestGenerator(transactioninsertkeysequence);			
 		}
+		if (scanbinds.get(0)!=null){
+			String readDis=scanbinds.get(0);
+	    	if (readDis.equals("uniform"))scanKey=new UniformIntegerGenerator(0,recordcount-1);
+	    	if (readDis.equals("zipfian")){
+	    		int opcount=Integer.parseInt(p.getProperty(Client.OPERATION_COUNT_PROPERTY));
+				int expectednewkeys=(int)(((double)opcount)*insertproportion*2.0); //2 is fudge factor				
+				scanKey=new ScrambledZipfianGenerator(recordcount+expectednewkeys);	    		
+	    	}
+	    	if (readDis.equals("latest"))scanKey=new SkewedLatestGenerator(transactioninsertkeysequence);			
+		}
+		if (updatebinds.get(0)!=null){
+			String readDis=updatebinds.get(0);
+	    	if (readDis.equals("uniform"))updateKey=new UniformIntegerGenerator(0,recordcount-1);
+	    	if (readDis.equals("zipfian")){
+	    		int opcount=Integer.parseInt(p.getProperty(Client.OPERATION_COUNT_PROPERTY));
+				int expectednewkeys=(int)(((double)opcount)*insertproportion*2.0); //2 is fudge factor				
+				updateKey=new ScrambledZipfianGenerator(recordcount+expectednewkeys);	    		
+	    	}
+	    	if (readDis.equals("latest"))updateKey=new SkewedLatestGenerator(transactioninsertkeysequence);			
+		}
+		if (insertbinds.get(0)!=null){
+			String readDis=insertbinds.get(0);
+	    	if (readDis.equals("uniform"))insertKey=new UniformIntegerGenerator(0,recordcount-1);
+	    	if (readDis.equals("zipfian")){
+	    		int opcount=Integer.parseInt(p.getProperty(Client.OPERATION_COUNT_PROPERTY));
+				int expectednewkeys=(int)(((double)opcount)*insertproportion*2.0); //2 is fudge factor				
+				insertKey=new ScrambledZipfianGenerator(recordcount+expectednewkeys);	    		
+	    	}
+	    	if (readDis.equals("latest"))insertKey=new SkewedLatestGenerator(transactioninsertkeysequence);			
+		}
+		
+		uniformGenerator=new UniformIntegerGenerator(1,200);
+		zipfianGenerator=new ScrambledZipfianGenerator(1,200);
+		exponentialGenerator=new ExponentialGenerator(95,200);
 	}
 
 	public String buildKeyName(long keynum) {
@@ -438,11 +638,37 @@ public class CoreWorkload extends Workload
  		}
 		return values;
 	}
+	//updated buildValue method to generator different distributions for different transactions, by Meizhen
+	HashMap<String, ByteIterator> buildValue(Hashtable<Integer,String> binds){
+		HashMap<String,ByteIterator> values=new HashMap<String,ByteIterator>();
+		for (int i=0; i<binds.size()-1;i++){
+			String fieldkey="field"+i+1;
+			String dis=binds.get(i+1);
+			//by default: uniform distribution
+			ByteIterator data=new UniformByteIterator(uniformGenerator);
+			if (dis.equals("uniform")){
+				//generator=new UniformIntegerGenerator(1,200);
+				 data=new UniformByteIterator(uniformGenerator);
+			}
+			if (dis.equals("zipfian")){
+				//generator=new ScrambledZipfianGenerator(1,200);
+				data=new UniformByteIterator(zipfianGenerator);
+			}
+			if (dis.equals("exponential")){
+				//generator=new ExponentialGenerator(95,200);
+				data=new UniformByteIterator(exponentialGenerator);
+			}
+			//ByteIterator data=new UniformByteIterator(binds.get(i+1));
+			values.put(fieldkey,data);
+		}
+		return values;
+	}
 	HashMap<String, ByteIterator> buildUpdate() {
 		//update a random field
 		HashMap<String, ByteIterator> values=new HashMap<String,ByteIterator>();
 		String fieldname="field"+fieldchooser.nextString();
 		ByteIterator data = new RandomByteIterator(fieldlengthgenerator.nextInt());
+		//ByteIterator data = new UniformByteIterator("uniform");
 		values.put(fieldname,data);
 		return values;
 	}
@@ -457,7 +683,8 @@ public class CoreWorkload extends Workload
 	{
 		int keynum=keysequence.nextInt();
 		String dbkey = buildKeyName(keynum);
-		HashMap<String, ByteIterator> values = buildValues();
+		//HashMap<String, ByteIterator> values = buildValues();
+		HashMap<String, ByteIterator> values = buildValue(insertbinds);
 		if (db.insert(table,dbkey,values) == 0)
 			return true;
 		else
@@ -515,12 +742,21 @@ public class CoreWorkload extends Workload
         }
         return keynum;
     }
+    int nextKeynum2(IntegerGenerator keyGenerator){
+    	int keynum;
+    	do
+        {
+            keynum=keyGenerator.nextInt();
+        }
+    	while (keynum > transactioninsertkeysequence.lastInt());
+    	return keynum;
+    }
 
 	public void doTransactionRead(DB db)
 	{
 		//choose a random key
-		int keynum = nextKeynum();
-		
+		//int keynum = nextKeynum();
+		int keynum = nextKeynum2(selectKey);
 		String keyname = buildKeyName(keynum);
 		
 		HashSet<String> fields=null;
@@ -533,7 +769,7 @@ public class CoreWorkload extends Workload
 			fields=new HashSet<String>();
 			fields.add(fieldname);
 		}
-
+		//db.read(table, keyname, new HashMap<String, ByteIterator>(), new HashMap<String, ByteIterator>());
 		db.read(table,keyname,fields,new HashMap<String,ByteIterator>());
 	}
 	
@@ -584,8 +820,8 @@ public class CoreWorkload extends Workload
 	public void doTransactionScan(DB db)
 	{
 		//choose a random key
-		int keynum = nextKeynum();
-
+		//int keynum = nextKeynum();
+		int keynum = nextKeynum2(scanKey);
 		String startkeyname = buildKeyName(keynum);
 		
 		//choose a random scan length
@@ -597,32 +833,36 @@ public class CoreWorkload extends Workload
 		{
 			//read a random field  
 			String fieldname="field"+fieldchooser.nextString();
-
+			
 			fields=new HashSet<String>();
 			fields.add(fieldname);
 		}
 
 		db.scan(table,startkeyname,len,fields,new Vector<HashMap<String,ByteIterator>>());
 	}
+	//IntegerGenerator co=new UniformIntegerGenerator(1,200); 
 
 	public void doTransactionUpdate(DB db)
 	{
 		//choose a random key
-		int keynum = nextKeynum();
-
+		//int keynum = nextKeynum();
+		int keynum = nextKeynum2(updateKey);
 		String keyname=buildKeyName(keynum);
-
 		HashMap<String,ByteIterator> values;
+		//Hashtable<String,Integer> value=new Hashtable<String,Integer>();
 
 		if (writeallfields)
 		{
 		   //new data for all the fields
-		   values = buildValues();
+		   //values = buildValues();
+			values = buildValue(updatebinds);
 		}
 		else
 		{
 		   //update a random field
-		   values = buildUpdate();
+		   //values = buildUpdate();
+			values = buildValue(updatebinds);
+			//value.put("field1",co.nextInt());
 		}
 
 		db.update(table,keyname,values);
@@ -634,8 +874,9 @@ public class CoreWorkload extends Workload
 		int keynum=transactioninsertkeysequence.nextInt();
 
 		String dbkey = buildKeyName(keynum);
-
-		HashMap<String, ByteIterator> values = buildValues();
+		//HashMap<String, ByteIterator> values = buildValues();
+		HashMap<String, ByteIterator> values = buildValue(insertbinds);
+		//HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
 		db.insert(table,dbkey,values);
 	}
 }

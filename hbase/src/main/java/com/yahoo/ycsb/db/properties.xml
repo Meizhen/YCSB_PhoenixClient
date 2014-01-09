@@ -2,22 +2,25 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 <comment>This is a property and workload file for phoenix in YCSB </comment>
-<entry key="create">CREATE TABLE IF NOT EXISTS usertable (ID VARCHAR PRIMARY KEY, FIELD1 VARCHAR, FIELD2 VARCHAR, FIELD3 VARCHAR, FIELD4 VARCHAR, FIELD5 VARCHAR)</entry>
-<entry key="read">SELECT * FROM usertable WHERE ID = ?</entry>
-<entry key="insert">UPSERT INTO usertable VALUES (?,?,?,?,?,?)</entry>
-<entry key="update">UPSERT INTO usertable VALUES (?,?,?,?,?,?)</entry>
-<entry key="delete">DELETE FROM usertable WHERE ID =?</entry>
-<entry key="scan">SELECT * FROM usertable WHERE ID > ? LIMIT ?</entry>
-<entry key="fieldcount">5</entry>
-<entry key="recordcount">100</entry>
-<entry key="operationcount">100</entry>
+<entry key="create">CREATE TABLE IF NOT EXISTS "USERTABLE" (ID VARCHAR PRIMARY KEY, FIELD1 VARCHAR, FIELD2 VARCHAR, FIELD3 VARCHAR, FIELD4 VARCHAR, FIELD5 VARCHAR, FIELD6 VARCHAR, FIELD7 VARCHAR, FIELD8 VARCHAR, FIELD9 VARCHAR, FIELD10 VARCHAR)
+</entry>
+<entry key="read">SELECT * FROM "USERTABLE" WHERE ID = ?</entry>
+<entry key="insert">UPSERT INTO USERTABLE VALUES (?,?,?,?,?,?,?,?,?,?,?)</entry>
+<entry key="update">UPSERT INTO "USERTABLE"(ID,FIELD1) VALUES (?,?)</entry>
+<entry key="delete">DELETE FROM USERTABLE WHERE ID =?</entry>
+<entry key="scan">SELECT * FROM USERTABLE WHERE ID > ? LIMIT ?</entry>
+<entry key="exportfile">/home/meizhen/workspace/YCSB/output.dat</entry>
+<entry key="fieldcount">10</entry>
+<entry key="recordcount">10000</entry>
+<entry key="operationcount">10000</entry>
 <entry key="readallfields">true</entry>
 <entry key="workload">com.yahoo.ycsb.workloads.CoreWorkload</entry>
 <entry key="columnfamily">family</entry>
-<entry key="readproportion">0.5</entry>
-<entry key="updateproportion">0.5</entry>
+<entry key="readproportion">0</entry>
+<entry key="updateproportion">1</entry>
 <entry key="scanproportion">0</entry>
 <entry key="insertproportion">0</entry>
 <entry key="deleteproportion">0</entry>
 <entry key="requestdistribution">zipfian</entry>
+
 </properties>

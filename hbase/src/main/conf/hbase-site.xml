@@ -24,18 +24,156 @@
 <configuration>
   <property>
     <name>hbase.rootdir</name>
-    <value>hdfs://<HBASE_MASTER_SERVER>:20001/hbase</value>
+    <value>hdfs://yahoo029.nicl.cs.duke.edu:54310/hbase</value>
     <description>The directory shared by region servers.
     </description>
   </property>
   <property>
     <name>hbase.master</name>
-    <value><HBASE_MASTER_SERVER>:60000</value>
+    <value>yahoo029.nicl.cs.duke.edu:60010</value>
     <description>The host and port that the HBase master runs at.
     </description>
   </property>
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value><HBASE_MASTER_SERVER></value>
+    <value>yahoo029.nicl.cs.duke.edu,yahoo030.nicl.cs.duke.edu,yahoo031.nicl.cs.duke.edu</value>
   </property>
+    <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.property.clientPort</name>
+    <value>2181</value>
+  </property>
+  <property>
+    <name>dfs.support.append</name>
+    <value>true</value>
+  </property>
+  <property>
+  	<name>hfile.block.cache.size</name>
+  	<value>0.4</value>
+  	<description>Percentage of maximum heap (-Xmx setting) to allocate to block cache used by HFile/StoreFile. 
+  	Default of 0.4 means allocate 40%.
+  	</description>
+  </property>
+    <property>
+  	<name>hbase.regionserver.global.memstore.upperLimit</name>
+  	<value>0.4</value>
+  	<description>Maximum size of all memstores in a region server before new updates are blocked and flushes are forced.
+  	Defaults to 40% of heap. 
+  	</description>
+  </property>
+    <property>
+  	<name>hbase.regionserver.global.memstore.lowerLimit</name>
+  	<value>0.38</value>
+  	<description>Maximum size of all memstores in a region server before flushes are forced.
+  	Defaults to 38% of heap.
+  	</description>
+  </property>
+  <property>
+  	<name>hbase.regionserver.handler.count</name>
+  	<value>100</value>
+  	<description>Count of RPC Listener instances spun up on RegionServers. 
+  	Same property is used by the Master for count of master handlers. Default is 30. 
+  	</description>
+  </property>
+   <property>
+  	<name>hbase.balancer.period</name>
+  	<value>30000</value>
+  	<description>Period at which the region balancer runs in the Master.Default: 300000 (5 min)
+  	</description>
+  </property>
+  <property>
+  	<name>ipc.server.tcpnodelay</name>
+  	<value>true</value>
+  	<description>
+  	</description>
+  </property>
+  <property>
+  	<name>hbase.ipc.client.tcpnodelay</name>
+  	<value>true</value>
+  	<description>
+  	</description>
+  </property>
+    <property>
+  	<name> hbase.client.scanner.caching</name>
+  	<value>1000</value>
+  	<description> how many rows are returned from the server in a single round trip when a scan is performed.
+  	phoenix default 1000
+  	</description>
+  </property>
+ 
+  <property>
+  	<name>phoenix.query.maxIntraRegionParallelization</name>
+  	<value>12</value>
+  	<description>The maximum number of threads that will be spawned to process data 
+  	within a single region during query execution. Default is 12
+  	</description>
+  </property>
+    <property>
+  	<name>phoenix.query.maxConcurrency</name>
+  	<value>12</value>
+  	<description>Maximum concurrent threads to use for a query. Default is 12
+  	</description>
+  </property>
+  <property>
+  	<name>phoenix.query.targetConcurrency</name>
+  	<value>8</value>
+  	<description>Target concurrent threads to use for a query. Default is 8
+  	</description>
+  </property>
+   <property>
+  	<name>phoenix.query.maxGlobalMemoryPercentage</name>
+  	<value>20</value>
+  	<description>Percentage of total heap memory (i.e. Runtime.getRuntime().totalMemory()) that all threads may use.
+  	 Default is 20%
+  	</description>
+  </property>
+  
+     <property>
+  	<name>phoenix.query.threadPoolSize</name>
+  	<value>20</value>
+  	<description>Number of threads in client side thread pool executor.
+	 As the number of machines/cores in the cluster grows, this value should be increased. Default 20
+  	</description>
+  </property>
+  <property>
+  	<name>phoenix.query.spoolThresholdBytes</name>
+  	<value>52428800</value>
+  	<description>Threshold size in bytes after which results from parallelly 
+  	executed aggregate query results are spooled to disk. Default is 50 mb (52428800). 
+    </description>
+  </property>
+    <property>
+  	<name>phoenix.mutate.maxSize</name>
+  	<value>500000</value>
+  	<description>The maximum number of rows that may be batched on the client 
+  	before a commit or rollback must be called. Default 500000.
+    </description>
+  </property>
+    <property>
+  	<name>phoenix.mutate.batchSize</name>
+  	<value>10000</value>
+  	<description>The number of rows that are batched together and automatically committed 
+  	during the execution of an UPSERT SELECT or DELETE statement. Default is 10,000 rows
+  	</description>
+  </property>
+  <property>
+  	<name>phoenix.mutate.upsertBatchSize</name>
+  	<value>10000</value>
+  	<description>data is buffered on the client and, if auto commit is on, committed in row batches as specified by the UpsertBatchSize connection property
+  	(or the phoenix.mutate.upsertBatchSize HBase config property which defaults to 10000 rows)
+    </description>
+  </property>
+  <property>
+  	<name>phoenix.query.rowKeyOrderSaltedTable</name>
+  	<value>false</value>
+  	<description>Whether or not a non aggregate query returns rows in row key order for salted tables. 
+  	If this option is turned on, split points may not be specified at table create time, 
+  	but instead the default splits on each salt bucket must be used. Default is false
+    </description>
+  </property>
+  
+  
 </configuration>

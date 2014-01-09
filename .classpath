@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="hbase/src/main/java"/>
+	<classpathentry kind="src" path="core/src/main/java"/>
+	<classpathentry kind="src" path="jdbc/src/main/java"/>
+	<classpathentry kind="src" path="src">
+		<attributes>
+			<attribute name="ignore_optional_problems" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="hbase/target/hbase-binding-0.1.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="hbase/target/archive-tmp/hbase-binding-0.1.4.jar"/>
+	<classpathentry kind="output" path="hbase/target/classes"/>
+</classpath>
