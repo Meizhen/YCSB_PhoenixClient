@@ -3,13 +3,7 @@ YCSB_PhoenixClient
 
 Yahoo cloud service benchmark (YCSB) with extended client to Phoenix
 
-mainly modified:
-
-CoreWorkload:
-YCSB_PhoenixClient / core / src / main / java / com / yahoo / ycsb / workloads / CoreWorkload.java 
-Modified to take schema and workload from external XML files, build prepared statement and workload accordingly and execute workload over HBase on server
-
-Phoenix Client:
+create Phoenix Client:
 YCSB_PhoenixClient / hbase / src / main / java / com / yahoo / ycsb / db /phoenixClient
 /**
  * This class extends the Yahoo! Cloud Servicing Benchmark (YCSB),
@@ -27,6 +21,13 @@ YCSB_PhoenixClient / hbase / src / main / java / com / yahoo / ycsb / db /phoeni
  * @author Meizhen Shi
  *
  */
+
+
+modified:
+
+CoreWorkload:
+YCSB_PhoenixClient / core / src / main / java / com / yahoo / ycsb / workloads / CoreWorkload.java 
+Modified to take schema and workload from external XML files, build prepared statement and workload accordingly and execute workload over HBase on server
 
 use schema and workload XMLs in Phoenix_Test:
 
